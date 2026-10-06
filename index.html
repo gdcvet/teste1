@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParasitoVet PUC Minas - Desafio dos Nematódeos Equinos</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        puc: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            800: '#1e3a8a',
+                            900: '#172554',
+                        },
+                        vet: {
+                            emerald: '#059669',
+                            amber: '#d97706',
+                            crimson: '#b91c1c'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- CABEÇALHO INSTITUCIONAL -->
+    <header class="bg-puc-900 text-white shadow-lg border-b-4 border-amber-500 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-3 text-center sm:text-left">
+                <div class="h-10 w-10 rounded-lg bg-amber-500 flex items-center justify-center font-bold text-puc-900 text-xl shadow-inner">
+                    🔬
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-tight">PUC Minas • Medicina Veterinária</h1>
+                    <p class="text-xs text-blue-200">Parasitologia Veterinária • Rota dos Helmintos de Equídeos</p>
+                </div>
+            </div>
+            
+            <!-- Barra de Status do Aluno -->
+            <div class="flex flex-wrap items-center gap-3 bg-puc-800/80 px-4 py-1.5 rounded-full border border-blue-700 text-xs sm:text-sm">
+                <div id="student-display-badge" class="font-medium text-amber-200 flex items-center gap-1.5 cursor-pointer" onclick="openStudentModal()" title="Clique para alterar identificação">
+                    <span>👤</span> <span id="student-name-header">Identificar-se</span>
+                    <span id="student-campus-badge" class="bg-amber-500/20 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded text-[11px] font-bold uppercase hidden">Betim</span>
+                </div>
+                <div class="h-4 w-px bg-blue-700"></div>
+                <div>Pontos: <span id="score-counter" class="font-bold text-amber-400">0</span> pts</div>
+                <div class="h-4 w-px bg-blue-700"></div>
+                <div>Progresso: <span id="progress-counter" class="font-semibold text-emerald-400">0/10</span></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVEGAÇÃO ENTRE MÓDULOS -->
+    <nav class="bg-white border-b border-slate-200 shadow-sm sticky top-[68px] z-40">
+        <div class="max-w-7xl mx-auto px-4 flex space-x-2 sm:space-x-6 text-sm font-semibold overflow-x-auto">
+            <button onclick="switchTab('cases')" id="tab-btn-cases" class="py-3 px-3 border-b-2 border-puc-700 text-puc-700 flex items-center gap-2 whitespace-nowrap">
+                📋 Casos Clínicos do HV
+            </button>
+            <button onclick="switchTab('anatomy')" id="tab-btn-anatomy" class="py-3 px-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap">
+                🎯 Rota Anatômica & Tropismo
+            </button>
+            <button onclick="switchTab('compendium')" id="tab-btn-compendium" class="py-3 px-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap">
+                📖 Compêndio Parasitológico
+            </button>
+            <button onclick="switchTab('teacher')" id="tab-btn-teacher" class="py-3 px-3 border-b-2 border-transparent text-amber-600 hover:text-amber-800 flex items-center gap-2 whitespace-nowrap ml-auto font-bold">
+                📊 Painel do Docente
+            </button>
+        </div>
+    </nav>
+
+    <!-- ÁREA PRINCIPAL DE CONTEÚDO -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ABA 1: CASOS CLÍNICOS DINÂMICOS -->
+        <section id="view-cases" class="block space-y-6">
+            <!-- Introdução do Docente -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-puc-700 p-4 rounded-r-lg text-sm text-slate-700 shadow-sm flex items-start gap-3">
+                <span class="text-2xl">👨‍🏫</span>
+                <div>
+                    <h3 class="font-bold text-puc-900 text-base">Orientações do Professor:</h3>
+                    <p class="mt-0.5">
+                        Olá, futuro colega médico-veterinário! Abaixo temos fichas clínicas de pacientes atendidos no Hospital Veterinário da PUC Minas. Analise a <strong>anamnese, faixa etária, epidemiologia e achados clínicos</strong> para correlacionar o parasita causador, a via de infecção, o tropismo de lesão e o teste diagnóstico de escolha.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Card de Caso Ativo -->
+            <div id="case-card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
+                <!-- Topo da Ficha Clínica -->
+                <div class="flex flex-wrap items-center justify-between border-b border-slate-100 pb-4 gap-2">
+                    <div>
+                        <span id="case-badge-number" class="text-xs font-bold uppercase tracking-wider text-puc-700 bg-puc-100 px-2.5 py-1 rounded-full">Caso 1 de 10</span>
+                        <h2 id="case-title" class="text-xl font-extrabold text-slate-800 mt-1">Garanhão com Cólica Tromboembólica</h2>
+                    </div>
+                    <span id="case-category" class="text-xs bg-slate-100 text-slate-600 font-medium px-3 py-1 rounded-md border border-slate-200">
+                        Equino Adulto • Trato Digestório & Vascular
+                    </span>
+                </div>
+
+                <!-- Prontuário Clínico Detalhado -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl text-sm border border-slate-200/70">
+                    <div>
+                        <span class="text-xs font-semibold text-slate-400 block uppercase">Identificação / Paciente</span>
+                        <p id="case-patient" class="font-medium text-slate-700 mt-0.5">Equino Brasileiro de Hipismo, 7 anos, macho.</p>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold text-slate-400 block uppercase">Histórico / Manejo</span>
+                        <p id="case-history" class="font-medium text-slate-700 mt-0.5">Pastagem rotacionada, sem vermifugação estratégica há 8 meses.</p>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold text-slate-400 block uppercase">Quadro Clínico & Achados</span>
+                        <p id="case-signs" class="font-medium text-slate-700 mt-0.5">Cólica aguda recidivante, dor intensa por isquemia intestinal, líquido peritoneal turvo com neutrófilos elevados.</p>
+                    </div>
+                </div>
+
+                <!-- Formulário de Diagnóstico Interativo -->
+                <div class="space-y-4 pt-2">
+                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-puc-600"></span>
+                        Decisão Clínica & Parasitológica:
+                    </h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Pergunta 1: Agente Etiológico -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">1. Parasita ou Grupo Envolvido:</label>
+                            <select id="input-parasite" class="w-full text-sm rounded-lg border-slate-300 bg-white border p-2.5 focus:ring-2 focus:ring-puc-600 focus:outline-none">
+                                <option value="">-- Selecione o parasita --</option>
+                                <option value="Strongylus vulgaris">Strongylus vulgaris</option>
+                                <option value="Strongylus edentatus">Strongylus edentatus</option>
+                                <option value="Strongylus equinus">Strongylus equinus</option>
+                                <option value="Cyathostominae">Cyathostominae (Pequenos estrôngilos)</option>
+                                <option value="Parascaris spp.">Parascaris spp. (P. univalens / P. equorum)</option>
+                                <option value="Oxyuris equi">Oxyuris equi</option>
+                                <option value="Habronema / Draschia">Habronema muscae / Draschia megastoma</option>
+                                <option value="Trichostrongylus axei">Trichostrongylus axei</option>
+                                <option value="Gasterophilus intestinalis">Gasterophilus intestinalis</option>
+                                <option value="Dictyocaulus arnfieldi">Dictyocaulus arnfieldi</option>
+                                <option value="Strongyloides westeri">Strongyloides westeri</option>
+                            </select>
+                        </div>
+
+                        <!-- Pergunta 2: Forma Infectante / Via -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">2. Forma Infectante & Mecanismo de Entrada:</label>
+                            <select id="input-stage" class="w-full text-sm rounded-lg border-slate-300 bg-white border p-2.5 focus:ring-2 focus:ring-puc-600 focus:outline-none">
+                                <option value="">-- Selecione a via / forma --</option>
+                                <option value="L3 livre no pasto">L3 livre na pastagem (ingestão na forragem)</option>
+                                <option value="Ovo embrionado com L3">Ovo embrionado contendo L3 (ingestão do ovo no ambiente/baia)</option>
+                                <option value="Vetor muscídeo com L3">Vetor muscídeo (mosca depositando L3 em boca, pele ou ferida)</option>
+                                <option value="Lactogênica / Úbere">L3 transmamária via colostro/leite materna (reativação de hipobiose)</option>
+                                <option value="Ovo no pelo / Lambedura">Ovo colado aos pelos com eclosão de L1 estimulada por calor/lambedura</option>
+                            </select>
+                        </div>
+
+                        <!-- Pergunta 3: Rota Migratória / Patogenia Principal -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">3. Rota de Migração / Lesão Patológica:</label>
+                            <select id="input-route" class="w-full text-sm rounded-lg border-slate-300 bg-white border p-2.5 focus:ring-2 focus:ring-puc-600 focus:outline-none">
+                                <option value="">-- Selecione o sítio patológico --</option>
+                                <option value="Arteria mesenterica cranial">Migração retrógrada na íntima da artéria mesentérica cranial (arterite/trombose)</option>
+                                <option value="Mucosa ceco e colon encistadas">Larvas encistadas na mucosa de ceco/cólon com emergência maciça súbita</option>
+                                <option value="Migracao hepato-traqueal">Migração hepato-traqueal e posterior obstrução do intestino delgado</option>
+                                <option value="Oviposicao perianal gomosa">Fêmeas migram ao ânus depositando massa adesiva perianal (tail rubbing)</option>
+                                <option value="Granuloma cutaneo ou ocular">Hipersensibilidade por larvas em feridas cutâneas ("summer sores") ou olhos</option>
+                                <option value="Figado tecido subperitoneal">Migração por veia porta -> fígado -> ligamentos e tecido subperitoneal</option>
+                                <option value="Gastrite catarral glandular">Mucosa gástrica glandular com gastrite catarral e erosões (compartilhado com ruminantes)</option>
+                                <option value="Margo plicatus larvas de mosca">Fixação de larvas (bots) por ganchos orais no margo plicatus gástrico por 8-10 meses</option>
+                                <option value="Bronquios e traqueia">Bronquites e traqueítes com tosse crônica em contato com asininos</option>
+                                <option value="Intestino delgado potro">Mucosa do intestino delgado de potros com diarreia aos 10-14 dias de vida</option>
+                            </select>
+                        </div>
+
+                        <!-- Pergunta 4: Diagnóstico de Eleição / Particularidade -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">4. Diagnóstico de Eleição / Armadilha Laboratorial:</label>
+                            <select id="input-diagnostic" class="w-full text-sm rounded-lg border-slate-300 bg-white border p-2.5 focus:ring-2 focus:ring-puc-600 focus:outline-none">
+                                <option value="">-- Selecione o método diagnóstico --</option>
+                                <option value="Coprocultura ou PCR fecal">Coprocultura larvar ou PCR (ovos indistinguíveis dos pequenos estrôngilos; doença aguda pré-patente)</option>
+                                <option value="Clinico e exclusao diarreia">Quadro clínico de diarreia + hipoalbuminemia (OPG fecal pode ser baixo durante emergência das L4)</option>
+                                <option value="Fita adesiva perianal">Fita adesiva transparente perianal (Graham) ou raspado anal; OPG fecal tem baixa sensibilidade</option>
+                                <option value="Biopsia profunda lesao">Biópsia tecidual profunda com histopatologia; coproscopia simples tem baixa sensibilidade</option>
+                                <option value="Ultrassom abdominal e OPG">Ultrassonografia de intestino delgado em potros para massas e OPG típico de ascarídeo</option>
+                                <option value="Coprocultura estomago">Coprocultura quantitativa para diferenciar as larvas de estrongilídeos</option>
+                                <option value="Inspecao pelos ou gastroscopia">Inspeção visual direta de ovos nos pelos dos membros ou gastroscopia</option>
+                                <option value="Lavado broncoalveolar ou Baermann">Lavado broncoalveolar (LBA) no equino ou Técnica de Baermann no jumento</option>
+                                <option value="Flutuacao fecal ovos pequenos">Flutuação fecal pesquisando ovos larvados pequenos em fezes diarreicas de potros</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Botão de Verificação -->
+                    <div class="flex items-center justify-end gap-3 pt-3">
+                        <button onclick="checkCaseAnswer()" class="bg-puc-700 hover:bg-puc-800 text-white font-bold py-2.5 px-6 rounded-xl transition duration-150 shadow-md hover:shadow-lg text-sm flex items-center gap-2">
+                            <span>Avaliar Conduta Clínica</span> 🩺
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Painel de Feedback do Docente -->
+                <div id="feedback-panel" class="hidden p-5 rounded-xl border text-sm transition-all duration-300">
+                    <!-- Gerado dinamicamente -->
+                </div>
+            </div>
+
+            <!-- Navegação Inferior de Casos -->
+            <div class="flex items-center justify-between">
+                <button onclick="prevCase()" id="btn-prev-case" class="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">
+                    ← Caso Anterior
+                </button>
+                <div class="flex gap-1.5" id="case-dots">
+                    <!-- Indicadores de bolinha -->
+                </div>
+                <button onclick="nextCase()" id="btn-next-case" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900 disabled:opacity-40 disabled:cursor-not-allowed">
+                    Próximo Caso →
+                </button>
+            </div>
+        </section>
+
+        <!-- ABA 2: ROTA ANATÔMICA & TROPISMO -->
+        <section id="view-anatomy" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div class="border-b pb-3">
+                    <h2 class="text-xl font-bold text-slate-800">Mapa de Tropismo & Lesões Anatômicas</h2>
+                    <p class="text-sm text-slate-500">Clique nos compartimentos anatômicos para revelar quais parasitas colonizam a região e como diferenciá-los pela patologia.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Card 1: Estômago -->
+                    <div class="border rounded-xl p-4 bg-amber-50/50 hover:bg-amber-50 border-amber-200 transition">
+                        <div class="flex items-center gap-2 font-bold text-amber-900">
+                            <span class="text-xl">🫀</span> Estômago (Gástrico)
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">Diferenciação crítica pelo sítio parietal:</p>
+                        <ul class="text-xs text-slate-700 mt-2 space-y-1.5 list-disc list-inside">
+                            <li><strong>Gasterophilus intestinalis:</strong> Larvas aderidas no <em>margo plicatus</em> (porção aglandular).</li>
+                            <li><strong>Draschia megastoma:</strong> Grandes nódulos fibrosos profundos próximo ao <em>margo plicatus</em>.</li>
+                            <li><strong>Habronema muscae:</strong> Mucosa gástrica superficial (sinais clínicos discretos).</li>
+                            <li><strong>Trichostrongylus axei:</strong> Mucosa <em>glandular</em> (gastrite catarral, erosões, comum com ruminantes).</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 2: Intestino Delgado -->
+                    <div class="border rounded-xl p-4 bg-blue-50/50 hover:bg-blue-50 border-blue-200 transition">
+                        <div class="flex items-center gap-2 font-bold text-puc-900">
+                            <span class="text-xl">🧬</span> Intestino Delgado (Potros)
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">Dominado pelos parasitas dos primeiros meses:</p>
+                        <ul class="text-xs text-slate-700 mt-2 space-y-1.5 list-disc list-inside">
+                            <li><strong>Parascaris spp.:</strong> Vermes adultos maciços no lúmen; risco de suboclusão e ruptura fatal após vermifugação rápida.</li>
+                            <li><strong>Strongyloides westeri:</strong> Adultos minúsculos na mucosa; causa enterite e diarreia aos 10-14 dias via transmamária.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 3: Ceco e Cólon (Intestino Grosso) -->
+                    <div class="border rounded-xl p-4 bg-emerald-50/50 hover:bg-emerald-50 border-emerald-200 transition">
+                        <div class="flex items-center gap-2 font-bold text-emerald-900">
+                            <span class="text-xl">🌿</span> Ceco & Cólon
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">Sede dos grandes e pequenos estrôngilos:</p>
+                        <ul class="text-xs text-slate-700 mt-2 space-y-1.5 list-disc list-inside">
+                            <li><strong>Cyathostominae:</strong> Adultos luminais; larvas encistadas (EL3/LL3/L4) na mucosa produzem cianostominose larval ao emergirem.</li>
+                            <li><strong>Grandes Strongylus:</strong> Adultos no ceco/cólon, mas larvas fazem migrações sistêmicas vasculares e parenquimatosas.</li>
+                            <li><strong>Oxyuris equi:</strong> Adultos no cólon dorsal antes da fêmea migrar para o reto.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 4: Sistema Vascular & Peritônio -->
+                    <div class="border rounded-xl p-4 bg-rose-50/50 hover:bg-rose-50 border-rose-200 transition">
+                        <div class="flex items-center gap-2 font-bold text-rose-900">
+                            <span class="text-xl">🩸</span> Artérias, Fígado & Peritônio
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">Rotas patognomônicas dos Grandes Estrôngilos:</p>
+                        <ul class="text-xs text-slate-700 mt-2 space-y-1.5 list-disc list-inside">
+                            <li><strong>S. vulgaris:</strong> Íntima da <em>artéria mesentérica cranial</em> (aneurisma verminoso, infarto isquêmico).</li>
+                            <li><strong>S. edentatus:</strong> Veias portais → fígado → nódulos hemorrágicos subperitoneais e mesentério.</li>
+                            <li><strong>S. equinus:</strong> Cavidade peritoneal → fígado → pâncreas → ceco.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 5: Aparelho Respiratório -->
+                    <div class="border rounded-xl p-4 bg-cyan-50/50 hover:bg-cyan-50 border-cyan-200 transition">
+                        <div class="flex items-center gap-2 font-bold text-cyan-900">
+                            <span class="text-xl">🫁</span> Pulmões e Traqueia
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">Afecções com tosse e migração larval:</p>
+                        <ul class="text-xs text-slate-700 mt-2 space-y-1.5 list-disc list-inside">
+                            <li><strong>Dictyocaulus arnfieldi:</strong> Habita brônquios; cavalos com tosse crônica convivendo com jumentos (reservatórios).</li>
+                            <li><strong>Parascaris spp.:</strong> Migração hepato-traqueal (larvas causam tosse e exsudato catarral antes da deglutição).</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 6: Pele, Olhos e Região Perianal -->
+                    <div class="border rounded-xl p-4 bg-purple-50/50 hover:bg-purple-50 border-purple-200 transition">
+                        <div class="flex items-center gap-2 font-bold text-purple-900">
+                            <span class="text-xl">🐴</span> Pele, Olho e Períneo
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">Manifestações ectópicas e dermatológicas:</p>
+                        <ul class="text-xs text-slate-700 mt-2 space-y-1.5 list-disc list-inside">
+                            <li><strong>Oxyuris equi:</strong> Pele perianal recoberta por massa adesiva amarelada gerando prurido intenso ("tail rubbing").</li>
+                            <li><strong>Habronema / Draschia:</strong> Feridas de verão ("summer sores") cutâneas ou lesões conjunturais/oculares granulomatosas com grãos de arroz.</li>
+                            <li><strong>Gasterophilus:</strong> Ovos aderidos aos pelos dos membros e dorso.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Desafio Rápido de Associação -->
+                <div class="mt-6 border-t pt-4">
+                    <h3 class="font-bold text-slate-800 text-sm mb-3">Mini-Teste: Identificação de Migração Larval</h3>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 text-sm">
+                        <p id="mini-question" class="font-medium text-slate-700">Qual parasita realiza a clássica migração retrógrada pela íntima da artéria mesentérica cranial, causando infarto isquêmico?</p>
+                        <div id="mini-options" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <!-- Inserido dinamicamente -->
+                        </div>
+                        <div id="mini-feedback" class="text-xs font-semibold hidden p-2 rounded"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 3: COMPÊNDIO PARASITOLÓGICO PUC MINAS -->
+        <section id="view-compendium" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                <div>
+                    <h2 class="text-2xl font-black text-puc-900">Compêndio de Nematódeos & Gasterófilos de Equídeos</h2>
+                    <p class="text-sm text-slate-500">Tabela de correlação completa baseada nas aulas 1 e 2 de Nematódeos Gastrointestinais.</p>
+                </div>
+
+                <!-- Tabela Comparativa Completa -->
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs border border-slate-200 divide-y divide-slate-200">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                            <tr>
+                                <th class="p-3">Parasita</th>
+                                <th class="p-3">Forma Infectante & Via</th>
+                                <th class="p-3">Localização do Adulto / Lesão</th>
+                                <th class="p-3">Manifestações Clínicas Clássicas</th>
+                                <th class="p-3">Método Diagnóstico de Eleição</th>
+                                <th class="p-3">Resistência / Manejo</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 text-slate-700 bg-white">
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-puc-900">Cyathostominae (Pequenos Estrôngilos)</td>
+                                <td class="p-3">L3 livre no pasto (ingestão na forragem)</td>
+                                <td class="p-3">Ceco e Cólon; larvas encistadas (EL3/LL3/L4) na mucosa</td>
+                                <td class="p-3">Cianostominose larval: diarreia profusa, hipoalbuminemia, edema ventral, perda de peso aguda</td>
+                                <td class="p-3">Diagnóstico clínico + exclusão. OPG fecal pode estar baixo na emergência das L4</td>
+                                <td class="p-3 text-red-600 font-semibold">Resistência ampla a Benzimidazóis e Pirimidinas; emergente a Lactonas</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-puc-900">Strongylus vulgaris</td>
+                                <td class="p-3">L3 livre no pasto</td>
+                                <td class="p-3">Adulto: Ceco/Cólon; Larvas: Íntima da Artéria Mesentérica Cranial</td>
+                                <td class="p-3">Arterite trombótica, êmbolos, isquemia intestinal, cólica aguda tromboembólica fatal</td>
+                                <td class="p-3">Coprocultura larvar ou PCR fecal (ovos são idênticos aos pequenos estrôngilos)</td>
+                                <td class="p-3 text-emerald-600 font-semibold">Geralmente suscetível a lactonas; risco com falta de tratamento basal</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-puc-900">Strongylus edentatus</td>
+                                <td class="p-3">L3 livre no pasto</td>
+                                <td class="p-3">Adulto: Ceco/Cólon; Larvas: Veias portais → Fígado → Tecido subperitoneal</td>
+                                <td class="p-3">Nódulos hemorrágicos subperitoneais e no mesentério; clínica manifesta rara</td>
+                                <td class="p-3">Coprocultura larvar</td>
+                                <td class="p-3">Suscetível</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-puc-900">Strongylus equinus</td>
+                                <td class="p-3">L3 livre no pasto</td>
+                                <td class="p-3">Adulto: Ceco/Cólon; Larvas: Cavidade peritoneal → Fígado → Pâncreas</td>
+                                <td class="p-3">Poucos sinais clínicos específicos durante a migração</td>
+                                <td class="p-3">Coprocultura larvar</td>
+                                <td class="p-3">Suscetível</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-puc-900">Parascaris spp. (P. univalens / P. equorum)</td>
+                                <td class="p-3">Ovo embrionado contendo L3 resistente no ambiente/baia</td>
+                                <td class="p-3">Adultos: Intestino Delgado; Larvas: Fígado e Pulmões (hepato-traqueal)</td>
+                                <td class="p-3">Tosse e catarro em potros; suboclusão/obstrução maciça por vermes adultos aos ~5 meses, cólica com refluxo</td>
+                                <td class="p-3">Ultrassonografia abdominal (massas luminais) e OPG (ovos esféricos casca espessa)</td>
+                                <td class="p-3 text-red-600 font-semibold">Resistência disseminada a ivermectina (lactonas macrocíclicas)</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-puc-900">Oxyuris equi</td>
+                                <td class="p-3">Ovo embrionado contendo L3 no ambiente/baia</td>
+                                <td class="p-3">Adultos: Cólon dorsal; Fêmeas migram para a margem anal</td>
+                                <td class="p-3">Massa adesiva esbranquiçada/amarelada no períneo, prurido anal intenso ("tail rubbing", cauda de rato)</td>
+                                <td class="p-3 font-bold text-amber-800">Fita adesiva transparente perianal (fita gomada); OPG fecal é ineficaz</td>
+                                <td class="p-3 text-red-600 font-semibold">Relatos consistentes de falha/resistência à ivermectina</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-puc-900">Habronema muscae / Draschia megastoma</td>
+                                <td class="p-3">Vetor muscídeo (moscas depositando L3 em feridas, lábios ou conjuntiva)</td>
+                                <td class="p-3">Forma gástrica: D. megastoma (nódulos margo plicatus), H. muscae (superfície). Cutânea: feridas.</td>
+                                <td class="p-3">"Feridas de verão" (granulomas exuberantes com grumos de arroz), blefaroconjuntivite, gastrite nodular</td>
+                                <td class="p-3 font-bold text-amber-800">Biópsia profunda com histopatologia; coproscopia tem baixíssima sensibilidade</td>
+                                <td class="p-3">Controle integrado de moscas vetor e tratamento local/sistêmico</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-puc-900">Trichostrongylus axei</td>
+                                <td class="p-3">L3 livre no pasto (pastoreio consorciado com bovinos/ovinos)</td>
+                                <td class="p-3">Mucosa glandular do estômago</td>
+                                <td class="p-3">Gastrite catarral crônica, erosões, hipoproteinemia, perda de peso e desempenho</td>
+                                <td class="p-3">Coprocultura larvar (ovos indistinguíveis de estrongilídeos)</td>
+                                <td class="p-3">Evitar pastejo simultâneo com pequenos ruminantes e bovinos</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-puc-900">Gasterophilus intestinalis</td>
+                                <td class="p-3">Ovos colados nos pelos; lambedura estimula eclosão da L1</td>
+                                <td class="p-3">L1 na cavidade oral (língua/gengiva); L2/L3 no <em>margo plicatus</em> gástrico por 8-10 meses</td>
+                                <td class="p-3">Desconforto oral, sialorreia; gastrite ulcerativa na fixação de larvas (bots)</td>
+                                <td class="p-3">Inspeção visual direta dos ovos nos pelos ou endoscopia gástrica (gastroscopia)</td>
+                                <td class="p-3">Tratamento após as primeiras geadas (outono/inverno)</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-puc-900">Dictyocaulus arnfieldi</td>
+                                <td class="p-3">L3 livre no pasto (dispersão auxiliada pelo fungo <em>Pilobolus</em>)</td>
+                                <td class="p-3">Brônquios e traqueia (hospedeiro natural: asinino/jumento)</td>
+                                <td class="p-3">Cavalo: tosse crônica, dispneia, infecção geralmente não patente. Asinino: assintomático</td>
+                                <td class="p-3 font-bold text-amber-800">Cavalo: Lavado broncoalveolar (LBA). Jumento: Técnica de Baermann / OPG</td>
+                                <td class="p-3">Evitar coabitação direta entre cavalos e jumentos sem tratamento</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-puc-900">Strongyloides westeri</td>
+                                <td class="p-3">Lactogênica (L3 reativada do úbere da égua no leite/colostro) ou percutânea</td>
+                                <td class="p-3">Intestino delgado de potros</td>
+                                <td class="p-3">Diarreia aquosa em potros lactentes entre o 10º e 14º dia de vida, desidratação</td>
+                                <td class="p-3 font-bold text-amber-800">Flutuação fecal buscando ovos pequenos larvados nas fezes do potro</td>
+                                <td class="p-3">Tratamento da égua ao parir ou do potro jovem</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Diretrizes de Controle Integrado (AAEP & Práticas PUC Minas) -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <h3 class="font-bold text-puc-900 text-sm mb-2">Princípios do Controle Parasitário Racional (Abandonando o Calendário Fixo):</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-600">
+                        <div class="bg-white p-3 rounded-lg border">
+                            <span class="font-bold text-slate-800 block mb-1">1. Classificação por OPG (FEC)</span>
+                            Cavalos adultos são classificados em baixos, médios e altos eliminadores. Apenas altos eliminadores recebem vermifugação supressora seletiva.
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border">
+                            <span class="font-bold text-slate-800 block mb-1">2. População em Refúgio</span>
+                            Manter parasitas suscetíveis que não foram expostos ao anti-helmíntico retarda a seleção de linhagens multirresistentes.
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border">
+                            <span class="font-bold text-slate-800 block mb-1">3. Jovens ≠ Adultos</span>
+                            Potros exigem controle focado em <em>Parascaris</em> e <em>Strongyloides</em>. Não replique protocolos de adultos em potros!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 4: PAINEL DO DOCENTE (ANALYTICS DA TURMA) -->
+        <section id="view-teacher" class="hidden space-y-6">
+            <!-- Modal de Acesso com Senha do Docente -->
+            <div id="teacher-auth-gate" class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm max-w-md mx-auto text-center space-y-4">
+                <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto text-2xl">
+                    🔐
+                </div>
+                <h2 class="text-xl font-bold text-puc-900">Acesso Restrito ao Docente</h2>
+                <p class="text-xs text-slate-500">Digite a senha pedagógica da disciplina de Parasitologia Veterinária para desbloquear o relatório de desempenho das turmas.</p>
+                <div class="space-y-3 pt-2">
+                    <input type="password" id="teacher-pass-input" placeholder="Senha do docente" class="w-full text-center tracking-wider text-sm p-2.5 border rounded-lg border-slate-300 focus:ring-2 focus:ring-puc-600 focus:outline-none" onkeydown="if(event.key==='Enter') verifyTeacherPass()">
+                    <button onclick="verifyTeacherPass()" class="w-full bg-puc-800 hover:bg-puc-900 text-white font-semibold py-2.5 rounded-lg text-sm transition shadow">
+                        Acessar Métricas da Turma
+                    </button>
+                    <p id="teacher-pass-error" class="text-xs text-rose-600 font-semibold hidden">Senha incorreta. A senha padrão do docente é: pucvet</p>
+                </div>
+            </div>
+
+            <!-- Conteúdo do Painel Liberado -->
+            <div id="teacher-dashboard-content" class="hidden space-y-6">
+                <!-- Barra de Ações Rápidas -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-amber-600 uppercase tracking-wider bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">Visão Geral da Turma</span>
+                        <h2 class="text-2xl font-black text-puc-900 mt-1">Desempenho Pedagógico dos Alunos</h2>
+                        <p class="text-xs text-slate-500">Acompanhamento de resoluções de casos clínicos por campus (Betim e Lourdes).</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="exportResultsCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-4 rounded-lg flex items-center gap-1.5 transition shadow">
+                            <span>📥</span> Baixar Relatório (Excel/CSV)
+                        </button>
+                        <button onclick="seedMockDataIfEmpty()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs py-2 px-3 rounded-lg border border-slate-300 transition" title="Adiciona dados simulados para teste visual">
+                            🧪 Simular Turma Teste
+                        </button>
+                        <button onclick="lockTeacherPanel()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-xs py-2 px-3 rounded-lg border border-rose-200 transition">
+                            🔒 Bloquear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cards com Indicadores Globais -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-semibold text-slate-400 block uppercase">Alunos Participantes</span>
+                        <div class="flex items-baseline justify-between mt-2">
+                            <span id="metric-total-students" class="text-3xl font-extrabold text-puc-900">0</span>
+                            <span class="text-xs text-blue-600 font-medium">Betim & Lourdes</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-semibold text-slate-400 block uppercase">Média Geral de Pontos</span>
+                        <div class="flex items-baseline justify-between mt-2">
+                            <span id="metric-avg-score" class="text-3xl font-extrabold text-amber-500">0</span>
+                            <span class="text-xs text-slate-400">máx. 1000 pts</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-semibold text-slate-400 block uppercase">Taxa de Conclusão Global</span>
+                        <div class="flex items-baseline justify-between mt-2">
+                            <span id="metric-completion-rate" class="text-3xl font-extrabold text-emerald-600">0%</span>
+                            <span class="text-xs text-slate-400">casos resolvidos</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-semibold text-slate-400 block uppercase">Caso Mais Desafiador</span>
+                        <div class="flex items-baseline justify-between mt-2">
+                            <span id="metric-hardest-case" class="text-sm font-bold text-rose-600 leading-tight">Calculando...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Diagnóstico por Caso Clínico: Onde a Turma Mais Teve Dúvidas -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <div>
+                            <h3 class="font-bold text-puc-900 text-base">Mapa de Dificuldade por Parasita / Caso Clínico</h3>
+                            <p class="text-xs text-slate-500">Identifique os tópicos em que os estudantes tiveram maior número de tentativas incorretas para focar na revisão em sala.</p>
+                        </div>
+                    </div>
+                    <div id="case-difficulty-bars" class="space-y-3">
+                        <!-- Renderizado via JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Tabela Individual de Alunos -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-3 p-6">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <h3 class="font-bold text-puc-900 text-base">Listagem Individual de Alunos</h3>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs text-slate-500">Filtrar por Campus:</label>
+                            <select id="filter-campus-select" onchange="renderStudentsTable()" class="text-xs border rounded-lg p-1.5 bg-slate-50">
+                                <option value="TODOS">Todos os Campi</option>
+                                <option value="Betim">Campus Betim</option>
+                                <option value="Lourdes">Campus Lourdes</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 uppercase border-b border-slate-200 font-semibold">
+                                    <th class="p-3">Nome do Aluno</th>
+                                    <th class="p-3">Campus</th>
+                                    <th class="p-3">Pontuação</th>
+                                    <th class="p-3">Casos Resolvidos</th>
+                                    <th class="p-3">Tentativas Incorretas</th>
+                                    <th class="p-3">Data / Hora</th>
+                                </tr>
+                            </thead>
+                            <tbody id="students-table-body" class="divide-y divide-slate-100 text-slate-700">
+                                <!-- Preenchido dinamicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL DE IDENTIFICAÇÃO DO ALUNO (CAMPUS: BETIM E LOURDES APENAS) -->
+    <div id="modal-student" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-fade-in">
+            <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+                <div class="h-10 w-10 rounded-xl bg-puc-700 text-amber-400 font-extrabold flex items-center justify-center text-lg">
+                    🐴
+                </div>
+                <div>
+                    <h3 class="font-bold text-puc-900 text-base">Identificação do Aluno</h3>
+                    <p class="text-xs text-slate-500">Medicina Veterinária • PUC Minas</p>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-600 leading-relaxed">
+                Por favor, informe seu nome completo e a sua unidade da PUC Minas antes de iniciar o desafio. Seu progresso será registrado para avaliação do docente.
+            </p>
+
+            <form onsubmit="saveStudentInfo(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nome Completo do Aluno:</label>
+                    <input type="text" id="input-student-name" required placeholder="Ex: Mariana Silva Rocha" class="w-full text-sm rounded-lg border-slate-300 bg-slate-50 border p-2.5 focus:bg-white focus:ring-2 focus:ring-puc-600 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Unidade / Campus:</label>
+                    <select id="input-student-campus" required class="w-full text-sm rounded-lg border-slate-300 bg-slate-50 border p-2.5 focus:bg-white focus:ring-2 focus:ring-puc-600 focus:outline-none">
+                        <option value="Betim">Campus Betim</option>
+                        <option value="Lourdes">Campus Lourdes (Belo Horizonte)</option>
+                    </select>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-puc-700 hover:bg-puc-800 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                        <span>Iniciar Desafio Clínico</span> 🎯
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- NOTIFICAÇÃO TOAST CUSTOMIZADA (SEM USO DE ALERT) -->
+    <div id="toast-notification" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-800 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 text-xs font-medium border border-slate-700 max-w-sm">
+        <span id="toast-icon" class="text-lg">ℹ️</span>
+        <span id="toast-msg">Mensagem de aviso</span>
+    </div>
+
+    <!-- FOOTER INSTITUCIONAL -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-4 border-t border-slate-800 text-center">
+        <p>Desenvolvido para as aulas de Parasitologia Veterinária • PUC Minas (Unidades Betim e Lourdes)</p>
+        <p class="text-slate-500 mt-1">Nematódeos Gastrointestinais e Parasitas Afins dos Equídeos • Baseado em evidências clínicas e patologia veterinária</p>
+    </footer>
+
+    <!-- SCRIPT DE DADOS E LÓGICA DO JOGO -->
+    <script>
+        // BANCO DE DADOS DOS 10 CASOS CLÍNICOS
+        const clinicalCases = [
+            {
+                id: 1,
+                title: "Garanhão com Cólica Tromboembólica Isquêmica",
+                category: "Equino Adulto • Sistema Vascular e Intestinal",
+                patient: "Cavalo Mangalarga Marchador, 8 anos, garanhão.",
+                history: "Manejado em pasto sem vermifugação estratégica há mais de 10 meses. Apresenta surtos de cólica recorrente.",
+                signs: "Cólica moderada a intensa, dor refratária a analgésicos comuns, hipomotilidade de cólon. Centese peritoneal com líquido serossanguinolento e trombose de ramos cólicos.",
+                correct: {
+                    parasite: "Strongylus vulgaris",
+                    stage: "L3 livre no pasto",
+                    route: "Arteria mesenterica cranial",
+                    diagnostic: "Coprocultura ou PCR fecal"
+                },
+                explanation: "O Strongylus vulgaris é o grande estrôngilo mais patogênico. Suas larvas L4 migram pela íntima da artéria mesentérica cranial, causando arterite verminosa, trombose e infarto isquêmico do intestino grosso. No exame de fezes comum, o ovo é idêntico aos pequenos estrôngilos e a doença grave ocorre durante a fase pré-patente larval."
+            },
+            {
+                id: 2,
+                title: "Pele e Cauda Despeladas por Prurido Intenso",
+                category: "Equino Estabulado • Afecção Perianal",
+                patient: "Égua Quarto de Milha, 5 anos, mantida em baia individual.",
+                history: "Proprietário relata que o animal esfrega a garupa contra a parede da cocheira repetidamente ('tail rubbing'). OPG fecal deu ZERO ovos.",
+                signs: "Região perianal com alopecia, escoriações, quebra de crinas na base da cauda ('cauda de rato') e presença de exsudato gomoso esbranquiçado aderido à margem anal.",
+                correct: {
+                    parasite: "Oxyuris equi",
+                    stage: "Ovo embrionado com L3",
+                    route: "Oviposicao perianal gomosa",
+                    diagnostic: "Fita adesiva perianal"
+                },
+                explanation: "Oxyuris equi causa prurido perianal característico. A fêmea adulta migra para a margem anal externa e deposita ovos envoltos em fluido pegajoso e morre. A infecção ocorre pela ingestão do ovo com L3 (muitas vezes nas baias). O OPG fecal é tipicamente falso-negativo pois os ovos não são liberados nas fezes, exigindo o Teste da Fita Adesiva (fita gomada)."
+            },
+            {
+                id: 3,
+                title: "Potro com Cólica por Obstrução Mecânica e Refluxo",
+                category: "Potros (5 meses) • Intestino Delgado",
+                patient: "Potro Puro Sangue Inglês, 5 meses de idade.",
+                history: "Tratado recentemente com anti-helmíntico de ação rápida. Histórico de tosse seca e secreção nasal catarral aos 2 meses de vida.",
+                signs: "Desconforto abdominal agudo, grande volume de refluxo nasogástrico, alças do intestino delgado dilatadas com massas intraluminais hiperecogênicas observadas ao ultrassom.",
+                correct: {
+                    parasite: "Parascaris spp.",
+                    stage: "Ovo embrionado com L3",
+                    route: "Migracao hepato-traqueal",
+                    diagnostic: "Ultrassom abdominal e OPG"
+                },
+                explanation: "Parascaris spp. (predominantemente P. univalens na atualidade) acomete potros jovens devido à falta de imunidade. Apresenta migração hepato-traqueal (provocando tosse prévia) e vermes adultos volumosos no intestino delgado. O tratamento massivo com fármacos de rápida paralisia pode causar lise em massa, bolo de vermes e obstrução luminal fatal. Apresenta ampla resistência a lactonas macrocíclicas."
+            },
+            {
+                id: 4,
+                title: "Surto de Diarreia Profusa, Edema e Perda de Peso em Jovem",
+                category: "Cavalo Jovem • Tiflocolite Larval",
+                patient: "Potro recém-desmamado, 14 meses, em pastagem degradada.",
+                history: "Vermifugado há duas semanas. Apresenta início abrupto de diarreia aquosa fétida, letargia profunda e emagrecimento acentuado.",
+                signs: "Hipoalbuminemia acentuada, edema subcutâneo ventral e de membros, espessamento da parede de ceco e cólon ventral. OPG fecal resultou em valores baixos.",
+                correct: {
+                    parasite: "Cyathostominae",
+                    stage: "L3 livre no pasto",
+                    route: "Mucosa ceco e colon encistadas",
+                    diagnostic: "Clinico e exclusao diarreia"
+                },
+                explanation: "Trata-se de Cianostominose Larval (Pequenos Estrôngilos). As larvas (EL3/LL3/L4) encistam na mucosa cecocólica e podem entrar em hipobiose. A emergência maciça e sincrônica dessas larvas rompe o epitélio intestinal, deflagrando tiflocolite grave, perda maciça de proteínas e diarreia. Como as larvas emergentes ainda são jovens e não adultos em postura, o OPG fecal frequentemente não reflete a gravidade do quadro."
+            },
+            {
+                id: 5,
+                title: "Ferida Exuberante de Difícil Cicatrização no Verão",
+                category: "Equino a Campo • Pele e Vetores",
+                patient: "Cavalo de Carga Crioulo, 9 anos, trabalhando na fazenda.",
+                history: "Pequena escoriação no boleto que não cicatriza durante a época quente e chuvosa (verão), com grande presença de moscas no local.",
+                signs: "Lesão granulomatosa crônica exuberante, ulcerada, pruriginosa, com exsudação serosanguinolenta e pequenos grumos calcificados amarelados semelhantes a 'grãos de arroz'.",
+                correct: {
+                    parasite: "Habronema / Draschia",
+                    stage: "Vetor muscídeo com L3",
+                    route: "Granuloma cutaneo ou ocular",
+                    diagnostic: "Biopsia profunda lesao"
+                },
+                explanation: "A Habronemose Cutânea ('Summer sores' ou Feridas de Verão) é causada pela deposição aberrante de larvas L3 por moscas muscídeas (vetores mecânicos/biológicos) sobre feridas ou mucosas. A larva não completa o ciclo na pele, mas induz severa hipersensibilidade granulomatosa eosinofílica com focos caseificados/calcificados ('grãos de arroz'). O diagnóstico requer biópsia profunda, pois raspados e coproscopia são inconclusivos."
+            },
+            {
+                id: 6,
+                title: "Tosse Crônica em Cavalo que Pastoreia com Jumentos",
+                category: "Equino Adulto • Sistema Respiratório",
+                patient: "Égua Campolina, 6 anos, mantida no mesmo piquete de dois jumentos.",
+                history: "Tosse crônica profunda, queda no rendimento sob sela. Os asininos do piquete não apresentam qualquer tosse e parecem saudáveis.",
+                signs: "Taquipneia aos esforços, estertores expiratórios à auscultação pulmonar. Exame coprológico fecal (flutuação comum) negativo para larvas no equino.",
+                correct: {
+                    parasite: "Dictyocaulus arnfieldi",
+                    stage: "L3 livre no pasto",
+                    route: "Bronquios e traqueia",
+                    diagnostic: "Lavado broncoalveolar ou Baermann"
+                },
+                explanation: "Dictyocaulus arnfieldi é o nematódeo pulmonar dos equídeos. O jumento (asinino) é o hospedeiro reservatório primário natural, desenvolvendo infecção patente com produção de ovos larvados sem manifestar tosse. No cavalo, a infecção raramente completa o ciclo (infecção não patente), gerando intensa bronquite/traqueíte alérgica. O diagnóstico no cavalo exige Lavado Broncoalveolar (LBA) ou coprologia de Baermann nos jumentos contactantes."
+            },
+            {
+                id: 7,
+                title: "Diarreia Aquosa em Potrinho com 12 Dias de Nascido",
+                category: "Neonato Equino • Via Transmamária",
+                patient: "Potro Mangalarga de apenas 12 dias de vida.",
+                history: "Parto normal, mamando regularmente na mãe. Baia limpa com cama de feno trocada.",
+                signs: "Início súbito de diarreia profusa líquida amarelada, desidratação leve e redução do ganho de peso. Égua saudável sem diarreia.",
+                correct: {
+                    parasite: "Strongyloides westeri",
+                    stage: "Lactogênica / Úbere",
+                    route: "Intestino delgado potro",
+                    diagnostic: "Flutuacao fecal ovos pequenos"
+                },
+                explanation: "Strongyloides westeri é o clássico parasita intestinal de neonatos equinos. A via preponderante de transmissão é a transmamária: larvas em hipobiose nos tecidos da égua são reativadas no periparto e eliminadas no colostro e leite. O período pré-patente é curtíssimo (10 a 14 dias), explicando a diarreia típica do potro lactente. O diagnóstico é feito pela flutuação fecal demonstrando ovos pequenos e larvados."
+            },
+            {
+                id: 8,
+                title: "Presença de Pequenos Pontos Amarelos nos Pelos dos Membros",
+                category: "Equino a Pasto • Ectoparasita / Díptero",
+                patient: "Cavalo de Salto Brasileiro de Hipismo, 10 anos.",
+                history: "Final do verão. Tratador nota centenas de pequenos pontos ovais amarelados colados firmemente aos pelos das canelas e espádua.",
+                signs: "Animal lambe frequentemente os membros anteriores. Sialorreia discreta e hiperemia gengival. À endoscopia gástrica, identificam-se larvas robustas avermelhadas fixadas no margo plicatus.",
+                correct: {
+                    parasite: "Gasterophilus intestinalis",
+                    stage: "Ovo no pelo / Lambedura",
+                    route: "Margo plicatus larvas de mosca",
+                    diagnostic: "Inspecao pelos ou gastroscopia"
+                },
+                explanation: "Gasterophilus intestinalis (mosca do bot equino). A fêmea adulta cola seus ovos na pelagem dos membros. O calor e a umidade da respiração/lambedura induzem a eclosão da L1, que penetra na mucosa oral (fase lingual/estomatite por ~4 semanas) e depois migra ao estômago, onde as larvas L2 e L3 se fixam no margo plicatus (área aglandular) por 8 a 10 meses antes de saírem nas fezes."
+            },
+            {
+                id: 9,
+                title: "Gastrite Catarral Crônica em Piquete Consorciado com Ovinos",
+                category: "Equino Adulto • Estômago Glandular",
+                patient: "Cavalo de Trabalho, 11 anos, pastoreando em piquete misto com carneiros.",
+                history: "Perda progressiva de escore corporal e pelagem opaca, mesmo recebendo ração balanceada.",
+                signs: "Erosões na mucosa gástrica glandular, espessamento da prega gástrica com hiperemia e gastrite catarral. Ovos encontrados no exame de fezes eram morfologicamente idênticos aos estrôngilos.",
+                correct: {
+                    parasite: "Trichostrongylus axei",
+                    stage: "L3 livre no pasto",
+                    route: "Gastrite catarral glandular",
+                    diagnostic: "Coprocultura estomago"
+                },
+                explanation: "Trichostrongylus axei é um tricostrongilídeo que infecta tanto ruminantes quanto equídeos. Acomete a mucosa glandular do estômago do cavalo, causando gastrite catarral crônica, espessamento mucoso e erosões. Como seus ovos nas fezes são indistinguíveis dos ovos de estrongilídeos comuns, a confirmação diagnóstica requer a diferenciação das larvas infectantes L3 por coprocultura."
+            },
+            {
+                id: 10,
+                title: "Achado de Necrópsia: Nódulos Hemorrágicos no Subperitônio",
+                category: "Patologia de Grandes Estrôngilos",
+                patient: "Equino macho, 12 anos, necropsiado para fins didáticos na aula prática.",
+                history: "Animal de área rural sem histórico de desparasitação nos últimos anos.",
+                signs: "À necropsia, identificam-se trajetos inflamatórios no parênquima hepático e volumosos nódulos hemorrágicos no tecido conectivo subperitoneal e ligamentos do mesentério, contendo larvas volumosas.",
+                correct: {
+                    parasite: "Strongylus edentatus",
+                    stage: "L3 livre no pasto",
+                    route: "Figado tecido subperitoneal",
+                    diagnostic: "Coprocultura ou PCR fecal"
+                },
+                explanation: "Strongylus edentatus possui uma rota migratória única entre os grandes estrôngilos: após penetrar a parede intestinal, atinge o fígado via sistema porta e depois migra através dos ligamentos hepáticos para o espaço retroperitoneal e subperitoneal da cavidade abdominal, formando hematomas e nódulos subperitoneais característicos antes de retornar ao ceco e cólon."
+            }
+        ];
+
+        let currentCaseIdx = 0;
+        let score = 0;
+        let completedCases = new Set();
+        let wrongAttemptsPerCase = {}; // Rastreia erros por caso
+
+        // DADOS DO ESTUDANTE ATIVO
+        let currentStudent = {
+            name: "",
+            campus: "Betim",
+            startedAt: new Date().toISOString()
+        };
+
+        // CONTROLE DO PAINEL DO PROFESSOR (SENHA PADRÃO: pucvet)
+        const TEACHER_DEFAULT_PIN = "pucvet";
+        let isTeacherUnlocked = false;
+
+        // BANCO DE DADOS EM MEMÓRIA PARA A TURMA
+        let classSubmissions = [];
+
+        // TOAST NOTIFIER (ELIMINA USO DE ALERT)
+        function showNotification(message, type = "info") {
+            const toast = document.getElementById('toast-notification');
+            const toastMsg = document.getElementById('toast-msg');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = message;
+            if (type === "warning") {
+                toastIcon.innerText = "⚠️";
+                toast.className = "fixed bottom-6 right-6 z-50 transition-all duration-300 bg-amber-800 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 text-xs font-medium border border-amber-600 max-w-sm";
+            } else if (type === "success") {
+                toastIcon.innerText = "✅";
+                toast.className = "fixed bottom-6 right-6 z-50 transition-all duration-300 bg-emerald-800 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 text-xs font-medium border border-emerald-600 max-w-sm";
+            } else {
+                toastIcon.innerText = "ℹ️";
+                toast.className = "fixed bottom-6 right-6 z-50 transition-all duration-300 bg-slate-800 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 text-xs font-medium border border-slate-700 max-w-sm";
+            }
+
+            // Exibe
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3500);
+        }
+
+        // GERENCIAMENTO DE IDENTIFICAÇÃO DO ALUNO
+        function openStudentModal() {
+            document.getElementById('modal-student').classList.remove('hidden');
+        }
+
+        function saveStudentInfo(e) {
+            e.preventDefault();
+            const name = document.getElementById('input-student-name').value.trim();
+            const campus = document.getElementById('input-student-campus').value;
+
+            if (!name) {
+                showNotification("Por favor, digite seu nome.", "warning");
+                return;
+            }
+
+            currentStudent.name = name;
+            currentStudent.campus = campus;
+
+            // Atualiza cabeçalho
+            document.getElementById('student-name-header').innerText = name;
+            const badge = document.getElementById('student-campus-badge');
+            badge.innerText = campus;
+            badge.classList.remove('hidden');
+
+            // Fecha modal
+            document.getElementById('modal-student').classList.add('hidden');
+            showNotification(`Bem-vindo(a), ${name} (Campus ${campus})! Bom desafio!`, "success");
+
+            // Registra ou atualiza submissão inicial
+            syncStudentSubmission();
+        }
+
+        // ALTERNÂNCIA DE ABAS (INCLUINDO PAINEL DO DOCENTE)
+        function switchTab(tabId) {
+            document.getElementById('view-cases').classList.add('hidden');
+            document.getElementById('view-anatomy').classList.add('hidden');
+            document.getElementById('view-compendium').classList.add('hidden');
+            document.getElementById('view-teacher').classList.add('hidden');
+
+            const tabCases = document.getElementById('tab-btn-cases');
+            const tabAnat = document.getElementById('tab-btn-anatomy');
+            const tabComp = document.getElementById('tab-btn-compendium');
+            const tabTeach = document.getElementById('tab-btn-teacher');
+
+            tabCases.className = "py-3 px-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap";
+            tabAnat.className = "py-3 px-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap";
+            tabComp.className = "py-3 px-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap";
+            tabTeach.className = "py-3 px-3 border-b-2 border-transparent text-amber-600 hover:text-amber-800 flex items-center gap-2 whitespace-nowrap ml-auto font-bold";
+
+            if (tabId === 'cases') {
+                document.getElementById('view-cases').classList.remove('hidden');
+                tabCases.className = "py-3 px-3 border-b-2 border-puc-700 text-puc-700 font-bold flex items-center gap-2 whitespace-nowrap";
+            } else if (tabId === 'anatomy') {
+                document.getElementById('view-anatomy').classList.remove('hidden');
+                tabAnat.className = "py-3 px-3 border-b-2 border-puc-700 text-puc-700 font-bold flex items-center gap-2 whitespace-nowrap";
+            } else if (tabId === 'compendium') {
+                document.getElementById('view-compendium').classList.remove('hidden');
+                tabComp.className = "py-3 px-3 border-b-2 border-puc-700 text-puc-700 font-bold flex items-center gap-2 whitespace-nowrap";
+            } else if (tabId === 'teacher') {
+                document.getElementById('view-teacher').classList.remove('hidden');
+                tabTeach.className = "py-3 px-3 border-b-2 border-amber-600 text-amber-800 font-bold flex items-center gap-2 whitespace-nowrap ml-auto";
+                if (isTeacherUnlocked) {
+                    refreshTeacherDashboard();
+                }
+            }
+        }
+
+        // AUTENTICAÇÃO DO PAINEL DO DOCENTE
+        function verifyTeacherPass() {
+            const pass = document.getElementById('teacher-pass-input').value;
+            const errEl = document.getElementById('teacher-pass-error');
+
+            if (pass === TEACHER_DEFAULT_PIN) {
+                isTeacherUnlocked = true;
+                errEl.classList.add('hidden');
+                document.getElementById('teacher-auth-gate').classList.add('hidden');
+                document.getElementById('teacher-dashboard-content').classList.remove('hidden');
+                refreshTeacherDashboard();
+                showNotification("Painel do Docente desbloqueado!", "success");
+            } else {
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        function lockTeacherPanel() {
+            isTeacherUnlocked = false;
+            document.getElementById('teacher-pass-input').value = "";
+            document.getElementById('teacher-auth-gate').classList.remove('hidden');
+            document.getElementById('teacher-dashboard-content').classList.add('hidden');
+        }
+
+        // ATUALIZAÇÃO DAS MÉTRICAS DO PROFESSOR
+        function refreshTeacherDashboard() {
+            renderKPIs();
+            renderDifficultyBars();
+            renderStudentsTable();
+        }
+
+        function renderKPIs() {
+            const total = classSubmissions.length;
+            document.getElementById('metric-total-students').innerText = total;
+
+            if (total === 0) {
+                document.getElementById('metric-avg-score').innerText = "0";
+                document.getElementById('metric-completion-rate').innerText = "0%";
+                document.getElementById('metric-hardest-case').innerText = "Sem dados";
+                return;
+            }
+
+            const totalScores = classSubmissions.reduce((acc, s) => acc + s.score, 0);
+            const avgScore = Math.round(totalScores / total);
+            document.getElementById('metric-avg-score').innerText = `${avgScore} pts`;
+
+            const totalCompleted = classSubmissions.reduce((acc, s) => acc + s.completedCount, 0);
+            const completionPercent = Math.round((totalCompleted / (total * clinicalCases.length)) * 100);
+            document.getElementById('metric-completion-rate').innerText = `${completionPercent}%`;
+
+            // Encontra o caso com maior número acumulado de erros
+            let errorCountByCase = {};
+            clinicalCases.forEach(c => { errorCountByCase[c.id] = 0; });
+            classSubmissions.forEach(sub => {
+                if (sub.wrongAttempts) {
+                    for (let cId in sub.wrongAttempts) {
+                        errorCountByCase[cId] = (errorCountByCase[cId] || 0) + sub.wrongAttempts[cId];
+                    }
+                }
+            });
+
+            let worstCaseId = 1;
+            let maxErrors = -1;
+            for (let cId in errorCountByCase) {
+                if (errorCountByCase[cId] > maxErrors) {
+                    maxErrors = errorCountByCase[cId];
+                    worstCaseId = cId;
+                }
+            }
+
+            const hardestCase = clinicalCases.find(c => c.id == worstCaseId);
+            document.getElementById('metric-hardest-case').innerText = hardestCase ? hardestCase.correct.parasite : "Em apuração";
+        }
+
+        function renderDifficultyBars() {
+            const container = document.getElementById('case-difficulty-bars');
+            container.innerHTML = "";
+
+            let errorCountByCase = {};
+            clinicalCases.forEach(c => { errorCountByCase[c.id] = 0; });
+            classSubmissions.forEach(sub => {
+                if (sub.wrongAttempts) {
+                    for (let cId in sub.wrongAttempts) {
+                        errorCountByCase[cId] = (errorCountByCase[cId] || 0) + sub.wrongAttempts[cId];
+                    }
+                }
+            });
+
+            let highestError = Math.max(...Object.values(errorCountByCase), 1);
+
+            clinicalCases.forEach((c) => {
+                const errs = errorCountByCase[c.id] || 0;
+                const pct = Math.min(100, Math.round((errs / highestError) * 100));
+
+                const row = document.createElement('div');
+                row.className = "text-xs space-y-1";
+                row.innerHTML = `
+                    <div class="flex justify-between font-semibold text-slate-700">
+                        <span>Caso ${c.id}: <strong>${c.correct.parasite}</strong> <span class="text-slate-400 font-normal">(${c.title})</span></span>
+                        <span class="text-rose-600 font-bold">${errs} tentativa(s) incorreta(s)</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                        <div class="bg-rose-500 h-2.5 rounded-full transition-all duration-500" style="width: ${errs === 0 ? 3 : pct}%"></div>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function renderStudentsTable() {
+            const tbody = document.getElementById('students-table-body');
+            tbody.innerHTML = "";
+            const filterCampus = document.getElementById('filter-campus-select').value;
+
+            const filtered = classSubmissions.filter(s => {
+                if (filterCampus === "TODOS") return true;
+                return s.campus === filterCampus;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum registro encontrado para este filtro.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(student => {
+                const totalWrongs = student.wrongAttempts ? Object.values(student.wrongAttempts).reduce((a, b) => a + b, 0) : 0;
+                const formattedDate = new Date(student.updatedAt || student.startedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-puc-900">${student.name}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded text-[11px] font-bold ${student.campus === 'Betim' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}">${student.campus}</span></td>
+                    <td class="p-3 font-extrabold text-amber-600">${student.score} pts</td>
+                    <td class="p-3 font-semibold text-emerald-600">${student.completedCount}/10</td>
+                    <td class="p-3 text-slate-500">${totalWrongs} erro(s)</td>
+                    <td class="p-3 text-slate-400">${formattedDate}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // EXPORTAÇÃO CSV PARA EXCEL
+        function exportResultsCSV() {
+            if (classSubmissions.length === 0) {
+                showNotification("Ainda não há respostas para exportar.", "warning");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Nome Aluno;Campus;Pontuacao;Casos Concluidos;Total Tentativas Erradas;Data\n";
+
+            classSubmissions.forEach(s => {
+                const totalWrongs = s.wrongAttempts ? Object.values(s.wrongAttempts).reduce((a, b) => a + b, 0) : 0;
+                csvContent += `"${s.name}";"${s.campus}";${s.score};${s.completedCount};${totalWrongs};"${new Date(s.updatedAt || s.startedAt).toLocaleString('pt-BR')}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `ParasitoVet_PUCMinas_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showNotification("Relatório gerado com sucesso!", "success");
+        }
+
+        // SIMULAÇÃO DE DADOS DE TESTE (TURMA PILOTO)
+        function seedMockDataIfEmpty() {
+            const mockStudents = [
+                { name: "Lucas Fernandes de Oliveira", campus: "Betim", score: 900, completedCount: 9, wrongAttempts: {1: 1, 4: 2}, startedAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+                { name: "Beatriz Nogueira Santos", campus: "Betim", score: 1000, completedCount: 10, wrongAttempts: {5: 1}, startedAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+                { name: "Gabriel Henrique Carvalho", campus: "Lourdes", score: 700, completedCount: 7, wrongAttempts: {1: 2, 4: 3, 6: 1}, startedAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+                { name: "Camila Ribeiro Guimarães", campus: "Lourdes", score: 800, completedCount: 8, wrongAttempts: {3: 2, 4: 1}, startedAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+                { name: "Thiago Alves Costa", campus: "Betim", score: 600, completedCount: 6, wrongAttempts: {1: 3, 2: 1, 8: 1}, startedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+            ];
+
+            mockStudents.forEach(ms => {
+                const exists = classSubmissions.find(s => s.name === ms.name);
+                if (!exists) classSubmissions.push(ms);
+            });
+
+            refreshTeacherDashboard();
+            showNotification("Dados simulados de alunos adicionados para visualização!", "success");
+        }
+
+        // ATUALIZAÇÃO CONTÍNUA DO REGISTRO DO ALUNO
+        function syncStudentSubmission() {
+            if (!currentStudent.name) return;
+
+            const sub = {
+                name: currentStudent.name,
+                campus: currentStudent.campus,
+                score: score,
+                completedCount: completedCases.size,
+                wrongAttempts: { ...wrongAttemptsPerCase },
+                updatedAt: new Date().toISOString()
+            };
+
+            const existingIdx = classSubmissions.findIndex(s => s.name === currentStudent.name && s.campus === currentStudent.campus);
+            if (existingIdx >= 0) {
+                classSubmissions[existingIdx] = sub;
+            } else {
+                classSubmissions.push(sub);
+            }
+
+            if (isTeacherUnlocked) {
+                refreshTeacherDashboard();
+            }
+        }
+
+        // VERIFICAÇÃO DO CASO CLÍNICO COM GRAVAÇÃO PEDAGÓGICA
+        function checkCaseAnswer() {
+            const c = clinicalCases[currentCaseIdx];
+            const pVal = document.getElementById('input-parasite').value;
+            const sVal = document.getElementById('input-stage').value;
+            const rVal = document.getElementById('input-route').value;
+            const dVal = document.getElementById('input-diagnostic').value;
+
+            // Substituição de alert() por modal/toast sem interromper
+            if (!pVal || !sVal || !rVal || !dVal) {
+                showNotification("Por favor, preencha as 4 decisões clínicas antes de avaliar a conduta!", "warning");
+                return;
+            }
+
+            const pOk = (pVal === c.correct.parasite);
+            const sOk = (sVal === c.correct.stage);
+            const rOk = (rVal === c.correct.route);
+            const dOk = (dVal === c.correct.diagnostic);
+
+            const allCorrect = pOk && sOk && rOk && dOk;
+            const fbPanel = document.getElementById('feedback-panel');
+            fbPanel.classList.remove('hidden');
+
+            if (allCorrect) {
+                if (!completedCases.has(currentCaseIdx)) {
+                    completedCases.add(currentCaseIdx);
+                    score += 100;
+                    document.getElementById('score-counter').innerText = score;
+                    document.getElementById('progress-counter').innerText = `${completedCases.size}/${clinicalCases.length}`;
+                    syncStudentSubmission();
+                }
+
+                fbPanel.className = "p-5 rounded-xl border border-emerald-300 bg-emerald-50 text-slate-800 space-y-3";
+                fbPanel.innerHTML = `
+                    <div class="flex items-center gap-2 text-emerald-800 font-bold text-base">
+                        <span class="text-xl">✅</span> Excelente raciocínio clínico! Diagnóstico correto!
+                    </div>
+                    <p class="text-sm text-slate-700 leading-relaxed">${c.explanation}</p>
+                    <div class="text-xs bg-emerald-100/70 p-2.5 rounded-lg border border-emerald-200 text-emerald-900 font-medium">
+                        <strong>Síntese Docente:</strong> Agente: <em>${c.correct.parasite}</em> | Via: <em>${c.correct.stage}</em> | Lesão: <em>${c.correct.route}</em>.
+                    </div>
+                `;
+            } else {
+                // Contabiliza erro para a análise de dificuldade do professor
+                wrongAttemptsPerCase[c.id] = (wrongAttemptsPerCase[c.id] || 0) + 1;
+                syncStudentSubmission();
+
+                let erros = [];
+                if (!pOk) erros.push(`• <strong>Parasita:</strong> O agente causal não é este.`);
+                if (!sOk) erros.push(`• <strong>Forma/Via de Entrada:</strong> Reveja como o equino ingere ou contrai a infecção.`);
+                if (!rOk) erros.push(`• <strong>Sítio/Rota Migratória:</strong> A patogenia relatada envolve outra estrutura anatômica.`);
+                if (!dOk) erros.push(`• <strong>Diagnóstico:</strong> Lembre-se das armadilhas (ovos indistinguíveis, falso-negativos em fezes ou infecções não patentes).`);
+
+                fbPanel.className = "p-5 rounded-xl border border-rose-300 bg-rose-50 text-slate-800 space-y-2.5";
+                fbPanel.innerHTML = `
+                    <div class="flex items-center gap-2 text-rose-800 font-bold text-base">
+                        <span class="text-xl">⚠️</span> Atenção aos detalhes da patologia e do ciclo:
+                    </div>
+                    <div class="text-xs text-rose-700 space-y-1">
+                        ${erros.join('<br>')}
+                    </div>
+                    <p class="text-xs text-slate-600 mt-2">Dica: releia a faixa etária do animal, o manejo e os sinais patognomônicos antes de submeter novamente.</p>
+                `;
+            }
+
+            updateCaseDots();
+        }
+
+        // NAVEGAÇÃO E CARREGAMENTO DINÂMICO DE CASOS
+        function loadCase(idx) {
+            currentCaseIdx = idx;
+            const c = clinicalCases[idx];
+            document.getElementById('case-badge-number').innerText = `Caso ${idx + 1} de ${clinicalCases.length}`;
+            document.getElementById('case-title').innerText = c.title;
+            document.getElementById('case-category').innerText = c.category;
+            document.getElementById('case-patient').innerText = c.patient;
+            document.getElementById('case-history').innerText = c.history;
+            document.getElementById('case-signs').innerText = c.signs;
+
+            const fb = document.getElementById('feedback-panel');
+            if (completedCases.has(idx)) {
+                document.getElementById('input-parasite').value = c.correct.parasite;
+                document.getElementById('input-stage').value = c.correct.stage;
+                document.getElementById('input-route').value = c.correct.route;
+                document.getElementById('input-diagnostic').value = c.correct.diagnostic;
+                fb.classList.remove('hidden');
+                fb.className = "p-5 rounded-xl border border-emerald-300 bg-emerald-50 text-slate-800 space-y-3";
+                fb.innerHTML = `
+                    <div class="flex items-center gap-2 text-emerald-800 font-bold text-base">
+                        <span class="text-xl">✅</span> Caso Clínico Concluído com Sucesso!
+                    </div>
+                    <p class="text-sm text-slate-700 leading-relaxed">${c.explanation}</p>
+                `;
+            } else {
+                document.getElementById('input-parasite').value = "";
+                document.getElementById('input-stage').value = "";
+                document.getElementById('input-route').value = "";
+                document.getElementById('input-diagnostic').value = "";
+                fb.classList.add('hidden');
+                fb.innerHTML = "";
+            }
+
+            document.getElementById('btn-prev-case').disabled = (idx === 0);
+            document.getElementById('btn-next-case').disabled = (idx === clinicalCases.length - 1);
+            updateCaseDots();
+        }
+
+        function prevCase() {
+            if (currentCaseIdx > 0) loadCase(currentCaseIdx - 1);
+        }
+
+        function nextCase() {
+            if (currentCaseIdx < clinicalCases.length - 1) loadCase(currentCaseIdx + 1);
+        }
+
+        function renderCaseDots() {
+            const container = document.getElementById('case-dots');
+            container.innerHTML = "";
+            clinicalCases.forEach((_, idx) => {
+                const dot = document.createElement('button');
+                dot.id = `dot-case-${idx}`;
+                dot.title = `Ir para o Caso ${idx + 1}`;
+                dot.onclick = () => loadCase(idx);
+                dot.className = "w-3 h-3 rounded-full transition-all duration-200 border border-slate-300 bg-slate-200 hover:scale-125";
+                container.appendChild(dot);
+            });
+            updateCaseDots();
+        }
+
+        function updateCaseDots() {
+            clinicalCases.forEach((_, idx) => {
+                const dot = document.getElementById(`dot-case-${idx}`);
+                if (!dot) return;
+                if (idx === currentCaseIdx) {
+                    dot.className = "w-3.5 h-3.5 rounded-full ring-2 ring-puc-600 ring-offset-1 bg-puc-700 transition-all duration-200 scale-110";
+                } else if (completedCases.has(idx)) {
+                    dot.className = "w-3 h-3 rounded-full bg-emerald-500 border border-emerald-600 transition-all duration-200";
+                } else {
+                    dot.className = "w-3 h-3 rounded-full bg-slate-200 hover:bg-slate-300 border border-slate-300 transition-all duration-200";
+                }
+            });
+        }
+
+        // MINI-TESTE INTERATIVO NA ABA ANATÔMICA
+        const miniQuestions = [
+            {
+                q: "Qual parasita realiza a clássica migração retrógrada pela íntima da artéria mesentérica cranial, causando arterite e infarto isquêmico intestinal?",
+                options: ["Parascaris spp.", "Strongylus vulgaris", "Trichostrongylus axei", "Cyathostominae"],
+                correct: 1,
+                exp: "Correto! O Strongylus vulgaris migra pela artéria mesentérica cranial gerando arterite trombótica e cólica grave."
+            },
+            {
+                q: "Qual exame de eleição deve ser realizado diante de alopecia na base da cauda por 'tail rubbing' com OPG fecal negativo?",
+                options: ["Técnica de Baermann", "Lavado broncoalveolar (LBA)", "Teste da Fita Adesiva transparente (Graham)", "Biópsia profunda com imprint"],
+                correct: 2,
+                exp: "Exato! Oxyuris equi deposita ovos envoltos em massa adesiva na margem anal; a contagem de ovos nas fezes não é sensível."
+            },
+            {
+                q: "Em qual compartimento anatômico as larvas (bots) de Gasterophilus intestinalis permanecem fixadas por 8 a 10 meses?",
+                options: ["Margo plicatus (área aglandular do estômago)", "Mucosa glandular do piloro", "Intestino delgado (íleo)", "Ceco e cólon dorsal"],
+                correct: 0,
+                exp: "Muito bem! As larvas L2 e L3 de Gasterophilus fixam-se no margo plicatus gástrico por 8 a 10 meses antes de saírem nas fezes."
+            },
+            {
+                q: "Qual achado é patognomônico de Habronemose cutânea ('feridas de verão')?",
+                options: ["Fezes com muco e sangue vivo", "Granulomas ulcerados com grânulos calcificados ('grãos de arroz')", "Tosse produtiva com muco", "Ovos com tampões bipolares nas fezes"],
+                correct: 1,
+                exp: "Exato! As larvas L3 depositadas por moscas geram hipersensibilidade granulomatosa com foco caseoso/calcificado semelhante a grãos de arroz."
+            }
+        ];
+        let currentMiniIdx = 0;
+
+        function renderMiniQuiz() {
+            const item = miniQuestions[currentMiniIdx];
+            document.getElementById('mini-question').innerText = item.q;
+            const container = document.getElementById('mini-options');
+            container.innerHTML = "";
+            const fb = document.getElementById('mini-feedback');
+            fb.className = "text-xs font-semibold hidden p-2 rounded";
+            fb.innerText = "";
+
+            item.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "text-left p-2.5 rounded-lg border border-slate-300 bg-white hover:bg-puc-50 hover:border-puc-400 text-xs font-medium transition shadow-sm";
+                btn.innerText = opt;
+                btn.onclick = () => checkMiniAnswer(idx);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkMiniAnswer(chosenIdx) {
+            const item = miniQuestions[currentMiniIdx];
+            const fb = document.getElementById('mini-feedback');
+            fb.classList.remove('hidden');
+            if (chosenIdx === item.correct) {
+                fb.className = "text-xs font-semibold p-2.5 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-200 block";
+                fb.innerHTML = `✅ ${item.exp} <button onclick="nextMiniQuestion()" class="ml-2 underline font-bold text-puc-900">Próxima pergunta →</button>`;
+            } else {
+                fb.className = "text-xs font-semibold p-2.5 rounded-lg bg-rose-100 text-rose-800 border border-rose-200 block";
+                fb.innerText = "❌ Incorreto. Releia os cards de tropismo anatômico acima e tente novamente!";
+            }
+        }
+
+        function nextMiniQuestion() {
+            currentMiniIdx = (currentMiniIdx + 1) % miniQuestions.length;
+            renderMiniQuiz();
+        }
+
+        // INICIALIZAÇÃO
+        function initApp() {
+            renderCaseDots();
+            loadCase(0);
+            renderMiniQuiz();
+            
+            // Abre o modal de identificação se o estudante ainda não informou os dados
+            if (!currentStudent.name) {
+                setTimeout(openStudentModal, 400);
+            }
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
